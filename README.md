@@ -3,15 +3,40 @@
 PHP client and worker for the [Orch8](https://orch8.io) durable workflow engine.
 
 - **`Orch8\Client`**: a typed REST client for sequences, instances, signals and background jobs. It works with any PSR-18 client and uses Guzzle 7 when you don't pass one.
-- **`Orch8\Worker\Worker`**: a long-poll worker. It implements the [worker wire protocol](../sdk-contract/WORKER_PROTOCOL.md): claim epochs, heartbeats, checkpoint CAS, lease loss, idempotent acks and graceful shutdown.
+- **`Orch8\Worker\Worker`**: a long-poll worker. It implements the Orch8 worker wire protocol (contract version 1): claim epochs, heartbeats, checkpoint CAS, lease loss, idempotent acks and graceful shutdown.
 - **`Orch8\Push\*`**: a push-dispatch signature verifier, a PSR-7 helper and an embeddable push listener.
 - **`Orch8\Jobs\Orch8Job`**: Laravel-style dispatch, e.g. `SendWelcomeEmail::dispatch($id)->onQueue('emails')->delay(60)`. Laravel is not required.
 
 Requirements: PHP ≥ 8.2 and ext-json. The worker needs `ext-pcntl` (and `ext-posix`) to run tasks concurrently and to shut down cleanly on SIGTERM/SIGINT. Without them it falls back to inline mode (see [Worker design](#worker-design)).
 
+## Install
+
+Not on Packagist yet. Today, add this repository as a VCS repository in your `composer.json`:
+
+```json
+{
+    "repositories": [
+        { "type": "vcs", "url": "https://github.com/orch8-io/sdk-php" }
+    ],
+    "require": {
+        "orch8/sdk": "^0.1"
+    }
+}
+```
+
+then run `composer update orch8/sdk`. A source zip is also attached to the
+[v0.1.0 GitHub release](https://github.com/orch8-io/sdk-php/releases/tag/v0.1.0).
+
+Once the package is on Packagist:
+
 ```bash
 composer require orch8/sdk
 ```
+
+Packagist needs no CI secret: after the package is submitted once at
+<https://packagist.org/packages/submit> (with the GitHub integration/webhook enabled), every pushed
+`vX.Y.Z` tag becomes a new version automatically. The tag-triggered release workflow only builds the
+GitHub Release.
 
 `guzzlehttp/guzzle` is a hard dependency. The client uses it only when you don't inject a PSR-18 client. The worker always uses it, because its event loop depends on Guzzle's `curl_multi` async handler.
 
@@ -223,9 +248,11 @@ The unit tests use:
 - the shared signature vectors, for the verifier;
 - an in-process fake engine plugged in as the Guzzle handler, for the worker, in both fork and inline mode.
 
-### Conformance kit
+### Conformance kit (local only)
 
-`conformance/adapter.php` implements the [adapter contract](../sdk-contract/conformance/README.md) on the public API. `bin/conformance` runs it in Docker:
+The conformance kit lives in the Orch8 `sdk-contract` checkout, which is not public yet, so this runs only on a machine that has it next to this repo; CI does not run it (CI runs the unit tests on PHP 8.2, 8.3 and 8.4 with pcntl).
+
+`conformance/adapter.php` implements the kit's adapter contract on the public API. `bin/conformance` runs it in Docker:
 
 - it passes the `ORCH8_*` variables through;
 - it adds `host.docker.internal`;
