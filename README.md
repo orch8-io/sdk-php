@@ -257,7 +257,7 @@ The unit tests use:
 
 ### Conformance kit (local only)
 
-The conformance kit lives in the Orch8 `sdk-contract` checkout, which is not public yet, so this runs only on a machine that has it next to this repo; CI does not run it (CI runs the unit tests on PHP 8.2, 8.3 and 8.4 with pcntl).
+The conformance kit is [orch8-io/sdk-contract](https://github.com/orch8-io/sdk-contract); clone it next to this repo to run it. CI runs the unit tests.
 
 `conformance/adapter.php` implements the kit's adapter contract on the public API. `bin/conformance` runs it in Docker:
 
