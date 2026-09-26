@@ -1,0 +1,38 @@
+{
+    "name": "orch8/sdk",
+    "description": "PHP SDK for the Orch8 durable workflow engine: typed REST client, forking worker, push-dispatch verifier and a Laravel-style jobs API.",
+    "type": "library",
+    "license": "MIT",
+    "keywords": ["orch8", "workflow", "durable-execution", "worker", "jobs", "queue"],
+    "require": {
+        "php": ">=8.2",
+        "ext-json": "*",
+        "guzzlehttp/guzzle": "^7.8",
+        "guzzlehttp/psr7": "^2.6",
+        "psr/http-client": "^1.0",
+        "psr/http-factory": "^1.0",
+        "psr/http-message": "^1.1 || ^2.0",
+        "psr/log": "^1.1 || ^2.0 || ^3.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^11.0"
+    },
+    "suggest": {
+        "ext-pcntl": "Required for concurrent (forked) task execution and graceful SIGTERM/SIGINT shutdown in Orch8\\Worker\\Worker",
+        "ext-posix": "Used by forked task processes to exit without running shared destructors"
+    },
+    "autoload": {
+        "psr-4": { "Orch8\\": "src/" }
+    },
+    "autoload-dev": {
+        "psr-4": { "Orch8\\Tests\\": "tests/" }
+    },
+    "config": {
+        "sort-packages": true,
+        "platform": { "php": "8.2.0" }
+    },
+    "scripts": {
+        "test": "phpunit"
+    },
+    "minimum-stability": "stable"
+}

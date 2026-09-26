@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+# Runs the conformance adapter (conformance/adapter.php) inside the dev docker
+# image so the kit can drive it from the host:
+#
+#   cd ../sdk-contract && node conformance/run.mjs --bind-host 0.0.0.0 \
+#     --advertise-host host.docker.internal --adapter "$PWD/../sdk-php/bin/conformance"
+#
+# `exec` hands this shell's PID to the docker CLI, which proxies SIGTERM to
+# PHP (PID 1 in the container; no --init so the signal reaches PHP directly).
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+IMAGE="${ORCH8_PHP_IMAGE:-orch8-sdk-php-dev}"
+
+if ! docker image inspect "$IMAGE" >/dev/null 2>&1; then
+  docker build -q -t "$IMAGE" "$ROOT/docker" >&2
+fi
+if [ ! -f "$ROOT/vendor/autoload.php" ]; then
+  docker run --rm -v "$ROOT:/app" -w /app "$IMAGE" composer install --no-interaction --quiet >&2
+fi
+
+args=(run --rm -i --add-host=host.docker.internal:host-gateway -v "$ROOT:/app" -w /app)
+for var in ORCH8_BASE_URL ORCH8_API_KEY ORCH8_TENANT_ID ORCH8_WORKER_ID ORCH8_CONCURRENCY \
+           ORCH8_POLL_INTERVAL_MS ORCH8_SHUTDOWN_TIMEOUT_MS ORCH8_QUEUE ORCH8_WORKER_VERSION \
+           ORCH8_MAX_ATTEMPTS ORCH8_RETRY_BASE_DELAY_MS ORCH8_PUSH_PORT ORCH8_PUSH_SECRET \
+           ORCH8_PUSH_TOLERANCE_SECS ORCH8_ADAPTER_DEBUG; do
+  args+=(-e "$var")
+done
+if [ -n "${ORCH8_PUSH_PORT:-}" ]; then
+  args+=(-p "${ORCH8_PUSH_PORT}:${ORCH8_PUSH_PORT}")
+fi
+
+exec docker "${args[@]}" "$IMAGE" php conformance/adapter.php "$@"
