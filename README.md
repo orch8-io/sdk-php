@@ -11,7 +11,14 @@ Requirements: PHP ≥ 8.2 and ext-json. The worker needs `ext-pcntl` (and `ext-p
 
 ## Install
 
-Not on Packagist yet. Today, add this repository as a VCS repository in your `composer.json`:
+Not on Packagist yet. Today, add this repository as a VCS repository and require the tag:
+
+```bash
+composer config repositories.orch8 vcs https://github.com/orch8-io/sdk-php
+composer require orch8/sdk:^0.1
+```
+
+which is equivalent to this `composer.json`:
 
 ```json
 {
@@ -24,7 +31,7 @@ Not on Packagist yet. Today, add this repository as a VCS repository in your `co
 }
 ```
 
-then run `composer update orch8/sdk`. A source zip is also attached to the
+A source zip is also attached to the
 [v0.1.0 GitHub release](https://github.com/orch8-io/sdk-php/releases/tag/v0.1.0).
 
 Once the package is on Packagist:
